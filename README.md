@@ -5,8 +5,7 @@ Windows desktop application for tunnel + forwarder operations (`WPF + .NET 8`).
 ## Download (End Users)
 
 - Open latest release: [https://github.com/binhunicorps/LocalhostTunnel/releases/latest](https://github.com/binhunicorps/LocalhostTunnel/releases/latest)
-- Recommended: download `LocalhostTunnel-Setup-win-x64-v*.exe` and run installer
-- Portable mode: download `LocalhostTunnel-Portable-win-x64-v*.zip`, extract, run `LocalhostTunnel.Desktop.exe`
+- Download `LocalhostTunnel-Portable-win-x64-v*.zip`, extract, run `LocalhostTunnel.Desktop.exe`
 
 ## Desktop (Windows GUI)
 
@@ -14,7 +13,6 @@ Windows desktop application for tunnel + forwarder operations (`WPF + .NET 8`).
 
 - .NET SDK 8
 - Windows 10/11 (x64)
-- Optional: Inno Setup Compiler (`iscc`) for installer generation
 
 ### Build and test
 
@@ -35,11 +33,6 @@ Expected output:
 - `artifacts/publish/LocalhostTunnel.Updater.exe`
 - `LocalhostTunnel.Desktop.exe` (launcher copy at repository root)
 - `artifacts/release/LocalhostTunnel-Portable-win-x64-v<version>.zip`
-
-If `iscc` is available, installer output is generated under:
-
-- `artifacts/installer/LocalhostTunnel-Setup-win-x64-v<version>.exe`
-- `artifacts/release/LocalhostTunnel-Setup-win-x64-v<version>.exe`
 
 ### GitHub release automation
 

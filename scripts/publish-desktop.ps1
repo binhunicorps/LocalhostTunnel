@@ -1,7 +1,7 @@
 param(
     [string]$Version = "",
     [switch]$SkipBuild,
-    [switch]$SkipInstaller
+    [switch]$IncludeInstaller
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,9 +38,7 @@ while ($versionParts.Count -lt 4) {
 
 $assemblyVersion = $versionParts -join "."
 $portableAssetName = "LocalhostTunnel-Portable-win-x64-v$Version.zip"
-$installerAssetName = "LocalhostTunnel-Setup-win-x64-v$Version.exe"
 $portableAssetPath = Join-Path $releaseDir $portableAssetName
-$installerAssetPath = Join-Path $releaseDir $installerAssetName
 
 if (-not $SkipBuild) {
     New-Item -ItemType Directory -Path $publishDir -Force | Out-Null
@@ -85,7 +83,10 @@ if (Test-Path $portableAssetPath) {
 }
 Compress-Archive -Path (Join-Path $publishDir "*") -DestinationPath $portableAssetPath -CompressionLevel Optimal
 
-if (-not $SkipInstaller) {
+if ($IncludeInstaller) {
+    $installerAssetName = "LocalhostTunnel-Setup-win-x64-v$Version.exe"
+    $installerAssetPath = Join-Path $releaseDir $installerAssetName
+
     if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) {
         Write-Warning "Inno Setup Compiler (iscc) not found. Skipping installer build."
     }
@@ -112,6 +113,6 @@ catch {
 Write-Host "Desktop publish completed."
 Write-Host "Output: $publishDir"
 Write-Host "Portable: $portableAssetPath"
-if (Test-Path $installerAssetPath) {
+if ($IncludeInstaller -and (Test-Path $installerAssetPath)) {
     Write-Host "Installer: $installerAssetPath"
 }

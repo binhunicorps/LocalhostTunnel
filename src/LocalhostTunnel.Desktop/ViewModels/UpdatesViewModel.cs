@@ -68,7 +68,21 @@ public sealed partial class UpdatesViewModel : ObservableObject
             return;
         }
 
-        var launched = await _updateCoordinator.LaunchUpdateAsync(CancellationToken.None);
-        StatusMessage = launched ? "Updater launched." : "Unable to launch updater.";
+        try
+        {
+            var launched = await _updateCoordinator.LaunchUpdateAsync(CancellationToken.None);
+            if (!launched)
+            {
+                StatusMessage = "Unable to launch updater.";
+                return;
+            }
+
+            StatusMessage = "Updater launched. Closing app to apply update...";
+            System.Windows.Application.Current?.Shutdown();
+        }
+        catch
+        {
+            StatusMessage = "Install update failed. Check logs and release package.";
+        }
     }
 }

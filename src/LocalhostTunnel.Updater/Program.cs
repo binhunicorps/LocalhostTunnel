@@ -16,6 +16,11 @@ internal static class Program
             return 1;
         }
 
+        var waitPid = parsed.TryGetValue("waitPid", out var waitPidValue) &&
+                      int.TryParse(waitPidValue, out var parsedPid)
+            ? parsedPid
+            : 0;
+
         var tempRoot = Path.Combine(Path.GetTempPath(), "LocalhostTunnel.Updater", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempRoot);
 
@@ -24,6 +29,8 @@ internal static class Program
 
         try
         {
+            await WaitForProcessExitAsync(waitPid, TimeSpan.FromMinutes(2));
+
             using (var httpClient = new HttpClient())
             await using (var archive = File.Create(archivePath))
             {
@@ -68,6 +75,35 @@ internal static class Program
         }
     }
 
+    private static async Task WaitForProcessExitAsync(int processId, TimeSpan timeout)
+    {
+        if (processId <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            if (process.HasExited)
+            {
+                return;
+            }
+
+            using var cts = new CancellationTokenSource(timeout);
+            try
+            {
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+        catch (ArgumentException)
+        {
+        }
+    }
+
     private static Dictionary<string, string> ParseArguments(string[] args)
     {
         var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -95,11 +131,19 @@ internal static class Program
     private static void CopyDirectory(string sourceDirectory, string targetDirectory)
     {
         Directory.CreateDirectory(targetDirectory);
+        var runningExecutablePath = Path.GetFullPath(Environment.ProcessPath ?? string.Empty);
 
         foreach (var filePath in Directory.GetFiles(sourceDirectory, "*", SearchOption.AllDirectories))
         {
             var relativePath = Path.GetRelativePath(sourceDirectory, filePath);
             var targetFilePath = Path.Combine(targetDirectory, relativePath);
+            var normalizedTargetPath = Path.GetFullPath(targetFilePath);
+            if (!string.IsNullOrWhiteSpace(runningExecutablePath) &&
+                string.Equals(normalizedTargetPath, runningExecutablePath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(targetFilePath)!);
             File.Copy(filePath, targetFilePath, overwrite: true);
         }

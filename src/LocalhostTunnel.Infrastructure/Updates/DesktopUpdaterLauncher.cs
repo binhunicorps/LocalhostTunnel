@@ -37,7 +37,8 @@ public sealed class DesktopUpdaterLauncher : IUpdaterLauncher
         var arguments =
             $"--downloadUrl \"{release.DownloadUrl}\" " +
             $"--targetDir \"{_targetDirectory}\" " +
-            $"--restartExe \"{_desktopExecutableName}\"";
+            $"--restartExe \"{_desktopExecutableName}\" " +
+            $"--waitPid \"{Environment.ProcessId}\"";
 
         var startInfo = new ProcessStartInfo
         {

@@ -14,7 +14,13 @@ public sealed class GitHubReleaseServiceTests
         var payload = """
         {
           "tag_name": "v1.0.16",
-          "zipball_url": "https://example.com/download.zip",
+          "zipball_url": "https://example.com/source.zip",
+          "assets": [
+            {
+              "name": "LocalhostTunnel-Portable-win-x64-v1.0.16.zip",
+              "browser_download_url": "https://example.com/portable.zip"
+            }
+          ],
           "body": "Bug fixes"
         }
         """;
@@ -26,6 +32,7 @@ public sealed class GitHubReleaseServiceTests
 
         release.Should().NotBeNull();
         release!.Version.Should().Be("1.0.16");
+        release.DownloadUrl.Should().Be("https://example.com/portable.zip");
     }
 
     [Fact]
@@ -34,7 +41,7 @@ public sealed class GitHubReleaseServiceTests
         var payload = """
         {
           "tag_name": "v1.0.15",
-          "zipball_url": "https://example.com/download.zip",
+          "zipball_url": "https://example.com/source.zip",
           "body": "Current"
         }
         """;
@@ -45,6 +52,27 @@ public sealed class GitHubReleaseServiceTests
         var release = await service.CheckForUpdatesAsync(CancellationToken.None);
 
         release.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task CheckForUpdatesAsync_Uses_Zipball_When_No_Portable_Asset()
+    {
+        var payload = """
+        {
+          "tag_name": "v1.0.16",
+          "zipball_url": "https://example.com/source.zip",
+          "assets": [],
+          "body": "Fallback"
+        }
+        """;
+
+        var httpClient = new HttpClient(new StubHandler(payload));
+        var service = new GitHubReleaseService(httpClient, currentVersion: "1.0.15");
+
+        var release = await service.CheckForUpdatesAsync(CancellationToken.None);
+
+        release.Should().NotBeNull();
+        release!.DownloadUrl.Should().Be("https://example.com/source.zip");
     }
 
     [Fact]

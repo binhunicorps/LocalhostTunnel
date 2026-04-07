@@ -1,10 +1,18 @@
+#ifndef AppVersion
+#define AppVersion "1.0.15"
+#endif
+
+#ifndef OutputBaseFilename
+#define OutputBaseFilename "LocalhostTunnel-Setup"
+#endif
+
 [Setup]
 AppName=Localhost Tunnel
-AppVersion=1.0.15
+AppVersion={#AppVersion}
 DefaultDirName={autopf}\LocalhostTunnel
 DefaultGroupName=Localhost Tunnel
 OutputDir=..\artifacts\installer
-OutputBaseFilename=LocalhostTunnel-Setup
+OutputBaseFilename={#OutputBaseFilename}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

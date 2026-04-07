@@ -1,0 +1,42 @@
+<Window x:Class="LocalhostTunnel.Desktop.Views.Dialogs.CloseBehaviorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Close Behavior"
+        Width="420"
+        Height="220"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="18"
+                   FontWeight="SemiBold"
+                   Text="How should the app close?" />
+
+        <TextBlock Grid.Row="1"
+                   Margin="0,12,0,0"
+                   TextWrapping="Wrap"
+                   Text="Choose whether to keep Localhost Tunnel running in the system tray or fully exit the application." />
+
+        <StackPanel Grid.Row="2"
+                    Margin="0,16,0,0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button MinWidth="98"
+                    Margin="0,0,8,0"
+                    Content="Run In Tray"
+                    Command="{Binding RunInTrayCommand}" />
+            <Button MinWidth="98"
+                    Margin="0,0,8,0"
+                    Content="Exit"
+                    Command="{Binding ExitApplicationCommand}" />
+            <Button MinWidth="98"
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,100 @@
+<UserControl x:Class="LocalhostTunnel.Desktop.Views.ConfigurationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionTitleTextStyle}" Text="Runtime Configuration" />
+            <TextBlock Margin="0,4,0,0"
+                       Style="{StaticResource ShellSubtitleTextStyle}"
+                       Text="Validate tunnel and target settings before launching runtime." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Margin="0,14,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Style="{StaticResource SoftPanelStyle}" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tunnel URL" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TunnelUrl, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tunnel Token" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TunnelToken, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Webhook Secret" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding WebhookSecret, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Listen Host" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Listen Port" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Max Body Size (bytes)" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding MaxBodySize, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SoftPanelStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Target Protocol" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TargetProtocol, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Target Host" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TargetHost, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Target Port" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding TargetPort, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Upstream Timeout (ms)" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding UpstreamTimeout, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Log Level" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding LogLevel, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Style="{StaticResource ShellSubtitleTextStyle}"
+                       Text="{Binding StatusMessage}" />
+            <ItemsControl ItemsSource="{Binding FieldErrors}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Foreground="{StaticResource BadBrush}" FontWeight="SemiBold">
+                            <Run Text="{Binding Key}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding Value}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <Button Margin="0,0,8,0"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Content="Reload"
+                        Command="{Binding ReloadCommand}" />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}"
+                        Content="Save Configuration"
+                        Command="{Binding SaveCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

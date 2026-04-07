@@ -1,0 +1,44 @@
+<UserControl x:Class="LocalhostTunnel.Desktop.Views.DiagnosticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Style="{StaticResource SoftPanelStyle}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionTitleTextStyle}" Text="Diagnostics Snapshot" />
+                <TextBlock Margin="0,4,0,0"
+                           Style="{StaticResource ShellSubtitleTextStyle}"
+                           Text="Current service states from runtime coordinator." />
+
+                <TextBlock Margin="0,14,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Tunnel State" />
+                <TextBlock Style="{StaticResource CardValueTextStyle}" Text="{Binding TunnelState}" />
+
+                <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Forwarder State" />
+                <TextBlock Style="{StaticResource CardValueTextStyle}" Text="{Binding ForwarderState}" />
+
+                <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Captured At" />
+                <TextBlock Style="{StaticResource ShellSubtitleTextStyle}" Text="{Binding LastCapturedAt}" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="2" Style="{StaticResource SoftPanelStyle}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Quick Checks" />
+                <TextBlock Margin="0,12,0,0"
+                           Style="{StaticResource ShellSubtitleTextStyle}"
+                           Text="1. Tunnel should be Running before forwarding external traffic." />
+                <TextBlock Margin="0,8,0,0"
+                           Style="{StaticResource ShellSubtitleTextStyle}"
+                           Text="2. Forwarder should be Running to proxy requests to localhost target." />
+                <TextBlock Margin="0,8,0,0"
+                           Style="{StaticResource ShellSubtitleTextStyle}"
+                           Text="3. If either state is Faulted, open Logs to inspect error messages." />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

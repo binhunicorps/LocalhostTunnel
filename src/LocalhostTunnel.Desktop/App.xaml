@@ -1,0 +1,15 @@
+<Application x:Class="LocalhostTunnel.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:LocalhostTunnel.Desktop.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/Colors.xaml" />
+                <ResourceDictionary Source="Theme/Typography.xaml" />
+                <ResourceDictionary Source="Theme/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:HoChiMinhTimeConverter x:Key="HoChiMinhTimeConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

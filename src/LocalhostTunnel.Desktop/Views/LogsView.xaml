@@ -1,0 +1,171 @@
+<UserControl x:Class="LocalhostTunnel.Desktop.Views.LogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource SoftPanelStyle}" Padding="14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Log Filters" />
+                    <TextBlock Margin="0,2,0,0"
+                               Style="{StaticResource ShellSubtitleTextStyle}"
+                               Text="Filter by level and search keyword." />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                    <Button Content="All"
+                            Tag="all"
+                            Click="OnLevelFilterClicked">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.SelectedLevel, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="all">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="Info"
+                            Tag="info"
+                            Click="OnLevelFilterClicked">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.SelectedLevel, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="info">
+                                        <Setter Property="Background" Value="{StaticResource GoodBrush}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource GoodBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="Warn"
+                            Tag="warn"
+                            Click="OnLevelFilterClicked">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.SelectedLevel, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="warn">
+                                        <Setter Property="Background" Value="{StaticResource WarnBrush}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource WarnBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="Error"
+                            Tag="error"
+                            Click="OnLevelFilterClicked"
+                            Margin="0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.SelectedLevel, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="error">
+                                        <Setter Property="Background" Value="{StaticResource BadBrush}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource BadBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+
+                <Grid Grid.Column="4" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             MinWidth="220"
+                             Padding="32,6,10,6" />
+                    <TextBlock Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource SubtleTextBrush}"
+                               FontSize="14"
+                               Text="&#x1F50D;" />
+                </Grid>
+
+                <Button Grid.Column="5"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Content="Refresh"
+                        Click="OnApplyFilterClicked" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Margin="0,12,0,0" Style="{StaticResource SoftPanelStyle}">
+            <ListBox BorderThickness="0"
+                     Background="Transparent"
+                     ItemsSource="{Binding FilteredLogs}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,8"
+                                Padding="10"
+                                CornerRadius="10"
+                                BorderBrush="{StaticResource BorderBrushColor}"
+                                BorderThickness="1"
+                                Background="{StaticResource SurfaceBrush}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Foreground="{StaticResource SubtleTextBrush}"
+                                           Text="{Binding Timestamp, Converter={StaticResource HoChiMinhTimeConverter}, ConverterParameter='HH:mm:ss'}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Level}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CardTitleTextStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Level}" Value="error">
+                                                    <Setter Property="Foreground" Value="{StaticResource BadBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="warn">
+                                                    <Setter Property="Foreground" Value="{StaticResource WarnBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="info">
+                                                    <Setter Property="Foreground" Value="{StaticResource GoodBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Grid.Column="2"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding Source}" />
+                                <TextBlock Grid.Column="3"
+                                           Foreground="{StaticResource ForegroundBrush}"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding Message}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,18 @@
+.env
+logs/
+*.log
+
+# Agent config (local dev only)
+.agent/
+.superpowers/
+
+# Build artifacts
+artifacts/
+LocalhostTunnel.Desktop.exe
+desktop/
+**/bin/
+**/obj/
+
+# Python/cache temp
+__pycache__/
+*.zip

@@ -24,6 +24,7 @@ if (-not $SkipBuild) {
         -r win-x64 `
         -p:PublishSingleFile=true `
         -p:SelfContained=true `
+        -p:IncludeNativeLibrariesForSelfExtract=true `
         -o $publishDir
 
     dotnet publish $updaterProject `
@@ -31,6 +32,7 @@ if (-not $SkipBuild) {
         -r win-x64 `
         -p:PublishSingleFile=true `
         -p:SelfContained=true `
+        -p:IncludeNativeLibrariesForSelfExtract=true `
         -o $publishDir
 }
 

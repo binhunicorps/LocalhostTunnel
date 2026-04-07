@@ -12,8 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Assets\localhost-tunnel.ico" />
-    <Resource Include="Assets\localhost-tunnel.ico" />
+    <None Remove="Assets\app-logo.ico" />
+    <None Remove="Assets\app-logo.png" />
+    <Resource Include="Assets\app-logo.ico" />
+    <Resource Include="Assets\app-logo.png" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -22,7 +24,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Assets\localhost-tunnel.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\app-logo.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>

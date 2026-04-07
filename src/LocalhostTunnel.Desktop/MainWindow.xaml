@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:LocalhostTunnel.Desktop.Views"
         xmlns:vm="clr-namespace:LocalhostTunnel.Desktop.ViewModels"
         Title="Localhost Tunnel"
-        Icon="/Assets/localhost-tunnel.ico"
+        Icon="/Assets/app-logo.ico"
         Width="1200"
         Height="760"
         MinWidth="980"
@@ -62,21 +62,14 @@
                     <StackPanel Orientation="Horizontal">
                         <Border Width="44"
                                 Height="44"
-                                CornerRadius="14"
+                                CornerRadius="10"
                                 Margin="0,0,10,0"
-                                Background="{StaticResource AccentBrush}">
-                            <Grid>
-                                <Ellipse Width="26" Height="26" Fill="#35FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,3,0" />
-                                <Path Stroke="White"
-                                      StrokeThickness="3"
-                                      StrokeLineJoin="Round"
-                                      Data="M14,11 L14,31 L30,31" />
-                                <Path Stroke="#D3F3FF"
-                                      StrokeThickness="2.5"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      Data="M11,14 L23,14" />
-                            </Grid>
+                                Background="Transparent"
+                                SnapsToDevicePixels="True">
+                            <Image Source="/Assets/app-logo.png"
+                                   Stretch="Uniform"
+                                   SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
                         <StackPanel>
                             <TextBlock FontFamily="Bahnschrift SemiBold"

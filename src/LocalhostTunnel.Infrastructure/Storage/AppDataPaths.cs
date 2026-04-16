@@ -3,6 +3,7 @@ namespace LocalhostTunnel.Infrastructure.Storage;
 public sealed record AppDataPaths(
     string RootDirectory,
     string ConfigFilePath,
+    string ProfilesConfigFilePath,
     string SessionFilePath,
     string LogDirectory,
     string CloudflaredDirectory)
@@ -16,6 +17,7 @@ public sealed record AppDataPaths(
         return new(
             root,
             Path.Combine(root, "config.json"),
+            Path.Combine(root, "config.profiles.json"),
             Path.Combine(root, "session.json"),
             Path.Combine(root, "logs"),
             Path.Combine(root, "cloudflared"));

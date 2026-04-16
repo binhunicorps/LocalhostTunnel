@@ -1,22 +1,32 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LocalhostTunnel.Application.Interfaces;
-using LocalhostTunnel.Application.Services;
+using LocalhostTunnel.Application.Services.Runtime;
 using LocalhostTunnel.Core.Configuration;
-using LocalhostTunnel.Core.Runtime;
+using System.Collections.ObjectModel;
 
 namespace LocalhostTunnel.Desktop.ViewModels;
 
 public sealed partial class ConfigurationViewModel : ObservableObject
 {
-    private readonly IConfigStore _configStore;
-    private readonly RuntimeCoordinator _runtimeCoordinator;
+    private readonly RuntimeManager _runtimeManager;
 
     [ObservableProperty]
-    private string _tunnelUrl = "";
+    private string _selectedProfileId = string.Empty;
 
     [ObservableProperty]
-    private string _tunnelToken = "";
+    private string _profileName = string.Empty;
+
+    [ObservableProperty]
+    private bool _enabled = true;
+
+    [ObservableProperty]
+    private ProfileType _profileType = ProfileType.Standard;
+
+    [ObservableProperty]
+    private string _tunnelUrl = string.Empty;
+
+    [ObservableProperty]
+    private string _tunnelToken = string.Empty;
 
     [ObservableProperty]
     private int _targetPort = 8765;
@@ -34,7 +44,7 @@ public sealed partial class ConfigurationViewModel : ObservableObject
     private string _targetProtocol = "http";
 
     [ObservableProperty]
-    private string _webhookSecret = "";
+    private string _webhookSecret = string.Empty;
 
     [ObservableProperty]
     private int _maxBodySize = 10 * 1024 * 1024;
@@ -48,14 +58,20 @@ public sealed partial class ConfigurationViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
-    public ConfigurationViewModel(IConfigStore configStore, RuntimeCoordinator runtimeCoordinator)
+    public ConfigurationViewModel(RuntimeManager runtimeManager)
     {
-        _configStore = configStore;
-        _runtimeCoordinator = runtimeCoordinator;
+        _runtimeManager = runtimeManager;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         ReloadCommand = new AsyncRelayCommand(LoadAsync);
+        AddStandardProfileCommand = new AsyncRelayCommand(AddStandardProfileAsync);
+        AddTavilyProfileCommand = new AsyncRelayCommand(AddTavilyProfileAsync);
+        DeleteProfileCommand = new AsyncRelayCommand(DeleteProfileAsync);
+        StartProfileCommand = new AsyncRelayCommand(StartProfileAsync);
+        StopProfileCommand = new AsyncRelayCommand(StopProfileAsync);
     }
+
+    public ObservableCollection<ProfileListItemViewModel> Profiles { get; } = [];
 
     public IReadOnlyDictionary<string, string> FieldErrors { get; private set; } = new Dictionary<string, string>();
 
@@ -63,39 +79,44 @@ public sealed partial class ConfigurationViewModel : ObservableObject
 
     public IAsyncRelayCommand ReloadCommand { get; }
 
+    public IAsyncRelayCommand AddStandardProfileCommand { get; }
+
+    public IAsyncRelayCommand AddTavilyProfileCommand { get; }
+
+    public IAsyncRelayCommand DeleteProfileCommand { get; }
+
+    public IAsyncRelayCommand StartProfileCommand { get; }
+
+    public IAsyncRelayCommand StopProfileCommand { get; }
+
     public async Task LoadAsync()
     {
-        StatusMessage = "Loading configuration...";
+        StatusMessage = "Loading profiles...";
 
-        try
-        {
-            var config = await _configStore.LoadAsync(CancellationToken.None);
+        await _runtimeManager.LoadAsync(CancellationToken.None);
+        BindProfiles();
 
-            TunnelUrl = config.TunnelUrl;
-            TunnelToken = config.TunnelToken;
-            TargetPort = config.TargetPort;
-            Port = config.Port;
-            Host = config.Host;
-            TargetHost = config.TargetHost;
-            TargetProtocol = config.TargetProtocol;
-            WebhookSecret = config.WebhookSecret;
-            MaxBodySize = config.MaxBodySize;
-            UpstreamTimeout = config.UpstreamTimeout;
-            LogLevel = config.LogLevel;
-            StatusMessage = "Configuration loaded.";
-        }
-        catch (Exception ex)
+        if (Profiles.Count == 0)
         {
-            StatusMessage = $"Unable to load configuration: {ex.Message}";
+            StatusMessage = "No profile available.";
+            return;
         }
+
+        var selectedId = _runtimeManager.SelectedProfileId;
+        if (string.IsNullOrWhiteSpace(selectedId) || !Profiles.Any(x => x.Id == selectedId))
+        {
+            selectedId = Profiles[0].Id;
+        }
+
+        SelectedProfileId = selectedId;
+        ApplyProfile(_runtimeManager.Profiles.First(x => x.Id == selectedId));
+        StatusMessage = "Configuration loaded.";
     }
 
     public async Task SaveAsync()
     {
-        StatusMessage = "Validating configuration...";
-
-        var config = BuildConfig();
-        var validation = AppConfigValidator.Validate(config);
+        var profile = BuildProfile();
+        var validation = TunnelProfileValidator.Validate(profile);
         FieldErrors = new Dictionary<string, string>(validation.Errors);
         OnPropertyChanged(nameof(FieldErrors));
 
@@ -105,46 +126,191 @@ public sealed partial class ConfigurationViewModel : ObservableObject
             return;
         }
 
-        await _configStore.SaveAsync(config, CancellationToken.None);
-        StatusMessage = "Configuration saved.";
+        var updated = _runtimeManager.Profiles
+            .Select(x => string.Equals(x.Id, profile.Id, StringComparison.OrdinalIgnoreCase) ? profile : x)
+            .ToArray();
 
-        if (!ShouldReloadRuntime(_runtimeCoordinator.Current))
+        var config = new ProfilesConfig
+        {
+            SelectedProfileId = profile.Id,
+            Profiles = updated
+        };
+
+        await _runtimeManager.SaveAsync(config, CancellationToken.None);
+        await _runtimeManager.SetSelectedProfileAsync(profile.Id, CancellationToken.None);
+        BindProfiles();
+        StatusMessage = "Configuration saved.";
+    }
+
+    public async Task AddStandardProfileAsync()
+    {
+        var newProfile = new TunnelProfile
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = $"Standard {Profiles.Count(x => x.Type == ProfileType.Standard) + 1}",
+            Type = ProfileType.Standard,
+            Enabled = true
+        };
+
+        var next = new ProfilesConfig
+        {
+            SelectedProfileId = newProfile.Id,
+            Profiles = _runtimeManager.Profiles.Concat([newProfile]).ToArray()
+        };
+
+        await _runtimeManager.SaveAsync(next, CancellationToken.None);
+        BindProfiles();
+        SelectedProfileId = newProfile.Id;
+        ApplyProfile(newProfile);
+        StatusMessage = "Standard profile added.";
+    }
+
+    public async Task AddTavilyProfileAsync()
+    {
+        var newProfile = new TunnelProfile
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = $"Tavily {Profiles.Count(x => x.Type == ProfileType.Tavily) + 1}",
+            Type = ProfileType.Tavily,
+            Enabled = true,
+            TargetHost = "127.0.0.1",
+            TargetPort = 8766,
+            Port = 8789,
+            Tavily = new TavilyConfig()
+        };
+
+        var next = new ProfilesConfig
+        {
+            SelectedProfileId = newProfile.Id,
+            Profiles = _runtimeManager.Profiles.Concat([newProfile]).ToArray()
+        };
+
+        await _runtimeManager.SaveAsync(next, CancellationToken.None);
+        BindProfiles();
+        SelectedProfileId = newProfile.Id;
+        ApplyProfile(newProfile);
+        StatusMessage = "Tavily profile added.";
+    }
+
+    public async Task DeleteProfileAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedProfileId))
         {
             return;
         }
 
+        await _runtimeManager.RemoveProfileAsync(SelectedProfileId, CancellationToken.None);
+        BindProfiles();
+
+        if (Profiles.Count > 0)
+        {
+            SelectedProfileId = Profiles[0].Id;
+            ApplyProfile(_runtimeManager.Profiles.First(x => x.Id == SelectedProfileId));
+        }
+
+        StatusMessage = "Profile removed.";
+    }
+
+    public async Task StartProfileAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedProfileId))
+        {
+            return;
+        }
+
+        await SaveAsync();
         try
         {
-            await _runtimeCoordinator.ReloadConfigAsync(CancellationToken.None);
-            StatusMessage = "Configuration saved and runtime reloaded.";
+            await _runtimeManager.StartProfileAsync(SelectedProfileId, CancellationToken.None);
+            StatusMessage = "Profile started.";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Configuration saved. Runtime reload failed: {ex.Message}";
+            StatusMessage = $"Start failed: {ex.Message}";
         }
     }
 
-    private static bool ShouldReloadRuntime(RuntimeSnapshot snapshot)
+    public async Task StopProfileAsync()
     {
-        return snapshot.Tunnel.State != ServiceState.Stopped ||
-               snapshot.Forwarder.State != ServiceState.Stopped;
+        if (string.IsNullOrWhiteSpace(SelectedProfileId))
+        {
+            return;
+        }
+
+        await _runtimeManager.StopProfileAsync(SelectedProfileId, CancellationToken.None);
+        StatusMessage = "Profile stopped.";
     }
 
-    private AppConfig BuildConfig()
+    partial void OnSelectedProfileIdChanged(string value)
     {
-        return new AppConfig
+        if (string.IsNullOrWhiteSpace(value))
         {
-            TunnelUrl = TunnelUrl,
-            TunnelToken = TunnelToken,
+            return;
+        }
+
+        var profile = _runtimeManager.Profiles.FirstOrDefault(x => string.Equals(x.Id, value, StringComparison.OrdinalIgnoreCase));
+        if (profile is null)
+        {
+            return;
+        }
+
+        _ = _runtimeManager.SetSelectedProfileAsync(profile.Id, CancellationToken.None);
+        ApplyProfile(profile);
+    }
+
+    private void ApplyProfile(TunnelProfile profile)
+    {
+        ProfileName = profile.Name;
+        Enabled = profile.Enabled;
+        ProfileType = profile.Type;
+        TunnelUrl = profile.TunnelUrl;
+        TunnelToken = profile.TunnelToken;
+        TargetPort = profile.TargetPort;
+        Port = profile.Port;
+        Host = profile.Host;
+        TargetHost = profile.TargetHost;
+        TargetProtocol = profile.TargetProtocol;
+        WebhookSecret = profile.WebhookSecret;
+        MaxBodySize = profile.MaxBodySize;
+        UpstreamTimeout = profile.UpstreamTimeout;
+        LogLevel = profile.LogLevel;
+    }
+
+    private void BindProfiles()
+    {
+        Profiles.Clear();
+        foreach (var profile in _runtimeManager.Profiles)
+        {
+            Profiles.Add(new ProfileListItemViewModel
+            {
+                Id = profile.Id,
+                Name = profile.Name,
+                Type = profile.Type,
+                Enabled = profile.Enabled
+            });
+        }
+    }
+
+    private TunnelProfile BuildProfile()
+    {
+        var existing = _runtimeManager.Profiles.First(x => string.Equals(x.Id, SelectedProfileId, StringComparison.OrdinalIgnoreCase));
+        return existing with
+        {
+            Name = string.IsNullOrWhiteSpace(ProfileName) ? existing.Name : ProfileName.Trim(),
+            Enabled = Enabled,
+            Type = ProfileType,
+            TunnelUrl = TunnelUrl.Trim(),
+            TunnelToken = TunnelToken.Trim(),
             TargetPort = TargetPort,
             Port = Port,
-            Host = Host,
-            TargetHost = TargetHost,
-            TargetProtocol = TargetProtocol,
+            Host = Host.Trim(),
+            TargetHost = TargetHost.Trim(),
+            TargetProtocol = TargetProtocol.Trim(),
             WebhookSecret = WebhookSecret,
             MaxBodySize = MaxBodySize,
             UpstreamTimeout = UpstreamTimeout,
-            LogLevel = LogLevel
+            LogLevel = LogLevel.Trim()
         };
     }
 }
+

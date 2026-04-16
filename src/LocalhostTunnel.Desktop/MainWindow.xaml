@@ -21,6 +21,9 @@
         <DataTemplate DataType="{x:Type vm:LogsViewModel}">
             <views:LogsView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TavilyApiViewModel}">
+            <views:TavilyApiView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:DiagnosticsViewModel}">
             <views:DiagnosticsView />
         </DataTemplate>
@@ -126,6 +129,21 @@
                             </Button.Style>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource NavLabelTextStyle}" Text="Logs" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ShowTavilyApiCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentRoute}" Value="tavily">
+                                            <Setter Property="Background" Value="#3A36A3FF" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource NavLabelTextStyle}" Text="Tavily API" />
                             </StackPanel>
                         </Button>
 

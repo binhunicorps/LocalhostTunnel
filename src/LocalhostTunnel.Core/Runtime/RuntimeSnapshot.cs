@@ -10,5 +10,9 @@ public sealed record RuntimeSnapshot
 
     public TunnelSnapshot Tunnel { get; init; } = new();
 
+    public IReadOnlyList<ProfileRuntimeSnapshot> Profiles { get; init; } = [];
+
+    public string SelectedProfileId { get; init; } = string.Empty;
+
     public IReadOnlyList<LogEntry> Logs { get; init; } = [];
 }

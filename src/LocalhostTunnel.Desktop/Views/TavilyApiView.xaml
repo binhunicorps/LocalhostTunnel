@@ -1,0 +1,105 @@
+<UserControl x:Class="LocalhostTunnel.Desktop.Views.TavilyApiView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionTitleTextStyle}" Text="Tavily API" />
+            <TextBlock Margin="0,4,0,0"
+                       Style="{StaticResource ShellSubtitleTextStyle}"
+                       Text="Run Tavily proxy directly inside desktop app and expose via tunnel profile." />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Margin="0,14,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Style="{StaticResource SoftPanelStyle}" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tavily Profile" />
+                            <ComboBox Margin="0,4,0,10"
+                                      ItemsSource="{Binding TavilyProfiles}"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="Id"
+                                      SelectedValue="{Binding SelectedProfileId, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Profile Name" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}" />
+                            <CheckBox Content="Enable profile in global runtime start"
+                                      IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tunnel URL" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TunnelUrl, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tunnel Token" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding TunnelToken, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Runtime State" />
+                            <TextBlock Margin="0,4,0,0" Style="{StaticResource CardValueTextStyle}" Text="{Binding RuntimeState}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SoftPanelStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tavily Host" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Tavily Port" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Forwarder Port" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ForwarderPort, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Base URL" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Timeout (seconds)" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding RequestTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="API Key 1" />
+                            <TextBox Margin="0,4,0,10" Text="{Binding ApiKey1, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="API Key 2" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ApiKey2, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Style="{StaticResource ShellSubtitleTextStyle}"
+                       Text="{Binding StatusMessage}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                <Button Margin="0,0,8,0"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Content="Reload"
+                        Command="{Binding ReloadCommand}" />
+                <Button Margin="0,0,8,0"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Content="Stop Tavily"
+                        Command="{Binding StopCommand}" />
+                <Button Margin="0,0,8,0"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Content="Start Tavily"
+                        Command="{Binding StartCommand}" />
+                <Button Style="{StaticResource PrimaryActionButtonStyle}"
+                        Content="Save Tavily Config"
+                        Command="{Binding SaveCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
+

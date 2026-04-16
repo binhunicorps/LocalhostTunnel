@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalhostTunnel.Application.Services;
+using LocalhostTunnel.Application.Services.Runtime;
 using LocalhostTunnel.Core.Runtime;
 using LocalhostTunnel.Desktop.Utilities;
 using System.Windows.Threading;
@@ -9,9 +10,10 @@ namespace LocalhostTunnel.Desktop.ViewModels;
 
 public sealed partial class MainWindowViewModel : ObservableObject
 {
-    private readonly RuntimeCoordinator _runtimeCoordinator;
+    private readonly RuntimeManager _runtimeManager;
     private readonly NavigationService _navigationService;
     private readonly ConfigurationViewModel _configurationViewModel;
+    private readonly TavilyApiViewModel _tavilyApiViewModel;
     private readonly LogsViewModel _logsViewModel;
     private readonly DiagnosticsViewModel _diagnosticsViewModel;
     private readonly UpdatesViewModel _updatesViewModel;
@@ -48,29 +50,32 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private string _runtimeStatusMessage = "Ready";
 
     public MainWindowViewModel(
-        RuntimeCoordinator runtimeCoordinator,
+        RuntimeManager runtimeManager,
         NavigationService navigationService,
         OverviewViewModel overviewViewModel,
         ConfigurationViewModel configurationViewModel,
+        TavilyApiViewModel tavilyApiViewModel,
         LogsViewModel logsViewModel,
         DiagnosticsViewModel diagnosticsViewModel,
         UpdatesViewModel updatesViewModel)
     {
-        _runtimeCoordinator = runtimeCoordinator;
+        _runtimeManager = runtimeManager;
         _navigationService = navigationService;
         Overview = overviewViewModel;
         _configurationViewModel = configurationViewModel;
+        _tavilyApiViewModel = tavilyApiViewModel;
         _logsViewModel = logsViewModel;
         _diagnosticsViewModel = diagnosticsViewModel;
         _updatesViewModel = updatesViewModel;
 
-        _runtimeCoordinator.SnapshotUpdated += OnSnapshotUpdated;
+        _runtimeManager.SnapshotUpdated += OnSnapshotUpdated;
         _navigationService.RouteChanged += OnRouteChanged;
 
         StartCommand = new AsyncRelayCommand(StartAsync);
         StopCommand = new AsyncRelayCommand(StopAsync);
         ShowOverviewCommand = new RelayCommand(() => _navigationService.Navigate("overview"));
         ShowConfigurationCommand = new RelayCommand(() => _navigationService.Navigate("configuration"));
+        ShowTavilyApiCommand = new RelayCommand(() => _navigationService.Navigate("tavily"));
         ShowLogsCommand = new RelayCommand(() => _navigationService.Navigate("logs"));
         ShowDiagnosticsCommand = new RelayCommand(() => _navigationService.Navigate("diagnostics"));
         ShowUpdatesCommand = new RelayCommand(() => _navigationService.Navigate("updates"));
@@ -78,8 +83,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         CurrentContent = Overview;
         SwitchContent(_navigationService.CurrentRoute);
 
-        _ = _configurationViewModel.LoadAsync();
-        _runtimeCoordinator.PublishSnapshot();
+        _ = InitializeAsync();
 
         _uiRefreshTimer = new DispatcherTimer(DispatcherPriority.Background)
         {
@@ -99,6 +103,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public IRelayCommand ShowConfigurationCommand { get; }
 
+    public IRelayCommand ShowTavilyApiCommand { get; }
+
     public IRelayCommand ShowLogsCommand { get; }
 
     public IRelayCommand ShowDiagnosticsCommand { get; }
@@ -107,14 +113,22 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public string TimeZoneLabel => AppTimeZone.DisplayLabel;
 
+    private async Task InitializeAsync()
+    {
+        await _runtimeManager.LoadAsync(CancellationToken.None);
+        await _configurationViewModel.LoadAsync();
+        await _tavilyApiViewModel.LoadAsync();
+        _runtimeManager.PublishSnapshot();
+    }
+
     private async Task StartAsync()
     {
-        RuntimeStatusMessage = "Starting runtime...";
+        RuntimeStatusMessage = "Starting enabled profiles...";
 
         try
         {
-            await _runtimeCoordinator.StartAsync(CancellationToken.None);
-            RuntimeStatusMessage = "Runtime started.";
+            await _runtimeManager.StartEnabledProfilesAsync(CancellationToken.None);
+            RuntimeStatusMessage = "Enabled profiles started.";
         }
         catch (Exception ex)
         {
@@ -122,18 +136,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         finally
         {
-            Apply(_runtimeCoordinator.Current);
+            Apply(_runtimeManager.Current);
         }
     }
 
     private async Task StopAsync()
     {
-        RuntimeStatusMessage = "Stopping runtime...";
+        RuntimeStatusMessage = "Stopping all profiles...";
 
         try
         {
-            await _runtimeCoordinator.StopAsync(CancellationToken.None);
-            RuntimeStatusMessage = "Runtime stopped.";
+            await _runtimeManager.StopAllAsync(CancellationToken.None);
+            RuntimeStatusMessage = "All profiles stopped.";
         }
         catch (Exception ex)
         {
@@ -141,7 +155,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
         finally
         {
-            Apply(_runtimeCoordinator.Current);
+            Apply(_runtimeManager.Current);
         }
     }
 
@@ -174,6 +188,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         CurrentContent = route switch
         {
             "configuration" => _configurationViewModel,
+            "tavily" => _tavilyApiViewModel,
             "logs" => GetLogsViewModel(),
             "diagnostics" => GetDiagnosticsViewModel(),
             "updates" => _updatesViewModel,
@@ -182,7 +197,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         (CurrentSectionTitle, CurrentSectionDescription) = route switch
         {
-            "configuration" => ("Configuration", "Manage tunnel, forwarding, and request constraints."),
+            "configuration" => ("Configuration", "Manage multiple runtime profiles and tunnel settings."),
+            "tavily" => ("Tavily API", "Configure and run Tavily proxy runtime inside this desktop app."),
             "logs" => ("Logs", "Filter, search, and inspect runtime events."),
             "diagnostics" => ("Diagnostics", "Inspect service health and capture status snapshots."),
             "updates" => ("Updates", "Check releases and launch the updater workflow."),
@@ -207,7 +223,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         return state switch
         {
             ServiceState.Running => "good",
-            ServiceState.Starting or ServiceState.Stopping => "warn",
+            ServiceState.Starting or ServiceState.Stopping => "good",
             ServiceState.Degraded or ServiceState.Faulted => "bad",
             _ => "neutral"
         };
@@ -215,7 +231,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OnUiRefreshTick(object? sender, EventArgs e)
     {
-        _runtimeCoordinator.PublishSnapshot();
+        _runtimeManager.PublishSnapshot();
         _logsViewModel.Refresh();
     }
 }
+

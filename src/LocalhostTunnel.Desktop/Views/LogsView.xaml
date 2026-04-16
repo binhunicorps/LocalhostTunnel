@@ -14,6 +14,8 @@
                     <ColumnDefinition Width="24" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -26,6 +28,17 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2"
+                            VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="Profile" />
+                    <ComboBox Margin="0,4,0,0"
+                              MinWidth="180"
+                              ItemsSource="{Binding AvailableProfiles}"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding SelectedProfileId, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="4"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">
                     <Button Content="All"
@@ -94,7 +107,7 @@
                     </Button>
                 </StackPanel>
 
-                <Grid Grid.Column="4" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Grid Grid.Column="6" Margin="0,0,10,0" VerticalAlignment="Center">
                     <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              MinWidth="220"
                              Padding="32,6,10,6" />
@@ -105,7 +118,7 @@
                                Text="&#x1F50D;" />
                 </Grid>
 
-                <Button Grid.Column="5"
+                <Button Grid.Column="7"
                         VerticalAlignment="Center"
                         Style="{StaticResource SecondaryActionButtonStyle}"
                         Content="Refresh"
@@ -130,6 +143,7 @@
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="70" />
                                     <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="170" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -158,6 +172,10 @@
                                            FontWeight="SemiBold"
                                            Text="{Binding Source}" />
                                 <TextBlock Grid.Column="3"
+                                           Foreground="{StaticResource SubtleTextBrush}"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding ProfileId}" />
+                                <TextBlock Grid.Column="4"
                                            Foreground="{StaticResource ForegroundBrush}"
                                            TextWrapping="Wrap"
                                            Text="{Binding Message}" />

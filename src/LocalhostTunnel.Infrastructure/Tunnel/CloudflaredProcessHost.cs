@@ -14,6 +14,7 @@ public sealed class CloudflaredProcessHost : ITunnelHost
     private readonly ILogStore _logStore;
     private readonly CloudflaredOutputParser _outputParser;
     private readonly string _cloudflaredExePath;
+    private readonly string _profileId;
 
     private Process? _process;
     private TunnelSnapshot _current = new();
@@ -24,7 +25,16 @@ public sealed class CloudflaredProcessHost : ITunnelHost
         ICloudflaredInstaller installer,
         ILogStore logStore,
         AppDataPaths paths)
-        : this(installer, logStore, paths, new CloudflaredOutputParser())
+        : this(installer, logStore, paths, string.Empty, new CloudflaredOutputParser())
+    {
+    }
+
+    public CloudflaredProcessHost(
+        ICloudflaredInstaller installer,
+        ILogStore logStore,
+        AppDataPaths paths,
+        string profileId)
+        : this(installer, logStore, paths, profileId, new CloudflaredOutputParser())
     {
     }
 
@@ -32,6 +42,7 @@ public sealed class CloudflaredProcessHost : ITunnelHost
         ICloudflaredInstaller installer,
         ILogStore logStore,
         AppDataPaths paths,
+        string profileId,
         CloudflaredOutputParser outputParser)
     {
         ArgumentNullException.ThrowIfNull(installer);
@@ -43,6 +54,7 @@ public sealed class CloudflaredProcessHost : ITunnelHost
         _logStore = logStore;
         _outputParser = outputParser;
         _cloudflaredExePath = Path.Combine(paths.CloudflaredDirectory, "cloudflared.exe");
+        _profileId = profileId;
     }
 
     public TunnelSnapshot Current
@@ -136,7 +148,7 @@ public sealed class CloudflaredProcessHost : ITunnelHost
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _logStore.Append(LogEntry.Info("cloudflared", $"failed to start cloudflared: {ex.Message}"));
+            _logStore.Append(LogEntry.Error("cloudflared", $"failed to start cloudflared: {ex.Message}", _profileId));
             lock (_sync)
             {
                 _current = new TunnelSnapshot
@@ -221,7 +233,7 @@ public sealed class CloudflaredProcessHost : ITunnelHost
             return;
         }
 
-        _logStore.Append(LogEntry.Info("cloudflared", line));
+        _logStore.Append(LogEntry.Info("cloudflared", line, _profileId));
         var parsed = _outputParser.Parse(line);
 
         lock (_sync)

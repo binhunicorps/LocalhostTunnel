@@ -21,6 +21,12 @@
                 <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Forwarder State" />
                 <TextBlock Style="{StaticResource CardValueTextStyle}" Text="{Binding ForwarderState}" />
 
+                <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Tavily State" />
+                <TextBlock Style="{StaticResource CardValueTextStyle}" Text="{Binding TavilyState}" />
+
+                <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Profile" />
+                <TextBlock Style="{StaticResource ShellSubtitleTextStyle}" Text="{Binding ProfileName}" />
+
                 <TextBlock Margin="0,12,0,0" Style="{StaticResource CardTitleTextStyle}" Text="Captured At" />
                 <TextBlock Style="{StaticResource ShellSubtitleTextStyle}" Text="{Binding LastCapturedAt}" />
             </StackPanel>

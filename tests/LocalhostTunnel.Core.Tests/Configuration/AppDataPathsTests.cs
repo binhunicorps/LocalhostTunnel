@@ -16,6 +16,7 @@ public class AppDataPathsTests
 
         paths.RootDirectory.Should().Be(localApplicationData);
         paths.ConfigFilePath.Should().Be(Path.Combine(localApplicationData, "config.json"));
+        paths.ProfilesConfigFilePath.Should().Be(Path.Combine(localApplicationData, "config.profiles.json"));
         paths.SessionFilePath.Should().Be(Path.Combine(localApplicationData, "session.json"));
         paths.LogDirectory.Should().Be(Path.Combine(localApplicationData, "logs"));
         paths.CloudflaredDirectory.Should().Be(Path.Combine(localApplicationData, "cloudflared"));

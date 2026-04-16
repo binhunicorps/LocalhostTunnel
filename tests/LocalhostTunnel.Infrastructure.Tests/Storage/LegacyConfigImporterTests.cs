@@ -22,6 +22,7 @@ public class LegacyConfigImporterTests : IDisposable
         _paths = new AppDataPaths(
             _rootDirectory,
             Path.Combine(_rootDirectory, "config.json"),
+            Path.Combine(_rootDirectory, "config.profiles.json"),
             Path.Combine(_rootDirectory, "session.json"),
             Path.Combine(_rootDirectory, "logs"),
             Path.Combine(_rootDirectory, "cloudflared"));

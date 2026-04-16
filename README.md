@@ -1,6 +1,6 @@
 # Localhost Tunnel
 
-Windows desktop application for tunnel + forwarder operations (`WPF + .NET 8`).
+Windows desktop application for multi-profile tunnel + forwarder operations (`WPF + .NET 8`) with built-in Tavily API proxy runtime.
 
 ## Download (End Users)
 
@@ -53,6 +53,27 @@ git push origin v1.0.16
 - `LocalhostTunnel.Infrastructure`: forwarder, cloudflared supervision, storage, updates
 - `LocalhostTunnel.Desktop`: WPF shell, view models, navigation, screens
 - `LocalhostTunnel.Updater`: external updater executable
+
+## Runtime Profiles
+
+- App now stores runtime profiles in `%LOCALAPPDATA%\LocalhostTunnel\config.profiles.json`
+- You can create multiple profiles in `Configuration` tab (`Standard` and `Tavily API`)
+- `Start Runtime` in Overview starts all enabled profiles
+- `Stop Runtime` stops all running profiles
+- Each profile can also be started/stopped directly from `Configuration`
+
+## Tavily API (Integrated)
+
+- `Tavily API` tab runs Tavily proxy directly inside desktop app
+- Configure:
+  - `Tunnel URL`
+  - `Tunnel Token`
+  - `Tavily Host/Port`
+  - `Forwarder Port`
+  - `Base URL`
+  - `API Key 1/2`
+- Use `Start Tavily` to run Tavily runtime for selected Tavily profile
+- No external `TavilyProxyAPI` Python project is required
 
 ## License
 

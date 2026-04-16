@@ -16,6 +16,11 @@
                     <TextBlock Margin="0,2,0,0"
                                Style="{StaticResource ShellSubtitleTextStyle}"
                                Text="Cloudflare tunnel link health" />
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{StaticResource ShellSubtitleTextStyle}">
+                        <Run Text="Profile: " />
+                        <Run Text="{Binding ActiveProfileName}" />
+                    </TextBlock>
                 </StackPanel>
             </Border>
 

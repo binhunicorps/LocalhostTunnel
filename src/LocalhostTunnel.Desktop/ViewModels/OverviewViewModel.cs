@@ -8,6 +8,9 @@ namespace LocalhostTunnel.Desktop.ViewModels;
 public sealed partial class OverviewViewModel : ObservableObject
 {
     [ObservableProperty]
+    private string _activeProfileName = "Default";
+
+    [ObservableProperty]
     private string _forwarderLabel = "Stopped";
 
     [ObservableProperty]
@@ -20,7 +23,17 @@ public sealed partial class OverviewViewModel : ObservableObject
 
     public void Apply(RuntimeSnapshot snapshot)
     {
-        ForwarderLabel = snapshot.Forwarder.State switch
+        var selected = snapshot.Profiles
+            .FirstOrDefault(x => string.Equals(x.ProfileId, snapshot.SelectedProfileId, StringComparison.OrdinalIgnoreCase));
+
+        var forwarderState = selected?.ForwarderState ?? snapshot.Forwarder.State;
+        var tunnelState = selected?.TunnelState ?? snapshot.Tunnel.State;
+        var uptime = selected?.Uptime ??
+                     (snapshot.Forwarder.Uptime > TimeSpan.Zero ? snapshot.Forwarder.Uptime : snapshot.Tunnel.Uptime);
+
+        ActiveProfileName = selected?.ProfileName ?? "Default";
+
+        ForwarderLabel = forwarderState switch
         {
             ServiceState.Running => "Running",
             ServiceState.Starting => "Starting",
@@ -30,7 +43,7 @@ public sealed partial class OverviewViewModel : ObservableObject
             _ => "Stopped"
         };
 
-        TunnelLabel = snapshot.Tunnel.State switch
+        TunnelLabel = tunnelState switch
         {
             ServiceState.Running => "Connected",
             ServiceState.Starting => "Connecting",
@@ -40,13 +53,18 @@ public sealed partial class OverviewViewModel : ObservableObject
             _ => "Disconnected"
         };
 
-        var uptime = snapshot.Forwarder.Uptime > TimeSpan.Zero
-            ? snapshot.Forwarder.Uptime
-            : snapshot.Tunnel.Uptime;
         UptimeLabel = uptime.ToString(@"hh\:mm\:ss");
 
+        var filteredLogs = snapshot.Logs.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(snapshot.SelectedProfileId))
+        {
+            filteredLogs = filteredLogs.Where(x =>
+                string.IsNullOrWhiteSpace(x.ProfileId) ||
+                string.Equals(x.ProfileId, snapshot.SelectedProfileId, StringComparison.OrdinalIgnoreCase));
+        }
+
         LiveLogs.Clear();
-        foreach (var entry in snapshot.Logs.TakeLast(40))
+        foreach (var entry in filteredLogs.TakeLast(40))
         {
             LiveLogs.Add(entry);
         }

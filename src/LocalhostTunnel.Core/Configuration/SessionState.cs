@@ -7,6 +7,9 @@ public sealed class SessionState
     [JsonPropertyName("last_active_screen")]
     public string LastActiveScreen { get; init; } = "";
 
+    [JsonPropertyName("last_active_profile_id")]
+    public string LastActiveProfileId { get; init; } = "";
+
     [JsonPropertyName("window_left")]
     public int? WindowLeft { get; init; }
 

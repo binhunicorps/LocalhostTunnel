@@ -147,9 +147,9 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Foreground="{StaticResource BadBrush}" FontWeight="SemiBold">
-                            <Run Text="{Binding Key}" />
+                            <Run Text="{Binding Key, Mode=OneWay}" />
                             <Run Text=": " />
-                            <Run Text="{Binding Value}" />
+                            <Run Text="{Binding Value, Mode=OneWay}" />
                         </TextBlock>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

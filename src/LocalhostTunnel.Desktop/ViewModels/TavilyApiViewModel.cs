@@ -20,12 +20,6 @@ public sealed partial class TavilyApiViewModel : ObservableObject
     private bool _enabled = true;
 
     [ObservableProperty]
-    private string _tunnelToken = string.Empty;
-
-    [ObservableProperty]
-    private string _tunnelUrl = string.Empty;
-
-    [ObservableProperty]
     private string _host = "127.0.0.1";
 
     [ObservableProperty]
@@ -184,8 +178,6 @@ public sealed partial class TavilyApiViewModel : ObservableObject
 
         ProfileName = profile.Name;
         Enabled = profile.Enabled;
-        TunnelToken = profile.TunnelToken;
-        TunnelUrl = profile.TunnelUrl;
 
         Host = tavily.Host;
         Port = tavily.Port;
@@ -200,23 +192,20 @@ public sealed partial class TavilyApiViewModel : ObservableObject
 
     private TunnelProfile BuildProfile()
     {
-        return new TunnelProfile
+        var existing = _runtimeManager.Profiles
+            .FirstOrDefault(x => string.Equals(x.Id, SelectedProfileId, StringComparison.OrdinalIgnoreCase));
+        if (existing is null)
         {
-            Id = SelectedProfileId,
+            throw new InvalidOperationException("Selected Tavily profile was not found.");
+        }
+
+        return existing with
+        {
             Name = string.IsNullOrWhiteSpace(ProfileName) ? "Tavily API" : ProfileName.Trim(),
             Type = ProfileType.Tavily,
             Enabled = Enabled,
-            TunnelUrl = TunnelUrl.Trim(),
-            TunnelToken = TunnelToken.Trim(),
-            TargetHost = "127.0.0.1",
             TargetPort = Port,
-            Host = "127.0.0.1",
             Port = ForwarderPort,
-            TargetProtocol = "http",
-            WebhookSecret = string.Empty,
-            MaxBodySize = 10 * 1024 * 1024,
-            UpstreamTimeout = 30000,
-            LogLevel = "info",
             Tavily = new TavilyConfig
             {
                 ApiKey1 = ApiKey1.Trim(),

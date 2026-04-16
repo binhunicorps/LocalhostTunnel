@@ -44,9 +44,9 @@
                                         <TextBlock Style="{StaticResource CardTitleTextStyle}" Text="{Binding Name}" />
                                         <TextBlock Margin="0,2,0,0"
                                                    Style="{StaticResource ShellSubtitleTextStyle}">
-                                            <Run Text="{Binding TypeLabel}" />
+                                            <Run Text="{Binding TypeLabel, Mode=OneWay}" />
                                             <Run Text=" | " />
-                                            <Run Text="{Binding Enabled}" />
+                                            <Run Text="{Binding Enabled, Mode=OneWay}" />
                                         </TextBlock>
                                     </StackPanel>
                                 </Border>
@@ -179,4 +179,3 @@
         </StackPanel>
     </Grid>
 </UserControl>
-
